@@ -1,0 +1,38 @@
+version: "3.8"
+volumes:
+  login-system-volume:
+networks:
+  login-system-network:
+
+services:
+  db:
+    container_name: login-system-db
+    image: "mysql:latest"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=login-system-db
+    ports:
+      - "3306:3306"
+    volumes:
+      - login-system-volume:/var/lib/mysql
+    networks:
+      - login-system-network
+
+  backend:
+    container_name: login-system-api
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRATION_IN_SECOND=${JWT_EXPIRATION_IN_SECOND}
+    networks:
+      - login-system-network
